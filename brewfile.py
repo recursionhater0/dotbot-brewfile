@@ -23,7 +23,6 @@ class Brew(dotbot.Plugin):
         'brewfile',
     ))
 
-    _tap_command = 'brew tap homebrew/bundle'
     _install_command = 'brew bundle'
 
     # Defaults
@@ -44,7 +43,6 @@ class Brew(dotbot.Plugin):
             if not self._does_brewfile_exist(data):
                 raise ValueError('Bundle file does not exist.')
 
-            self._handle_tap(data)
             self._handle_install(data)
         except ValueError as e:
             self._log.error(e)
@@ -137,23 +135,6 @@ class Brew(dotbot.Plugin):
         stderr = data.get('stderr', stderr_default)
 
         return stdout, stderr
-
-    def _handle_tap(self, data):
-        stdout, stderr = self._get_options(data)
-
-        with open(os.devnull, 'w') as devnull:
-            result = subprocess.call(
-                self._tap_command,
-                shell=True,
-                stdin=devnull,
-                stdout=True if stdout else devnull,
-                stderr=True if stderr else devnull,
-                cwd=self.cwd,
-                executable=os.environ.get('SHELL'),
-            )
-
-            if result != 0:
-                raise ValueError('Failed to tap homebrew/bundle.')
 
     def _handle_install(self, data):
         environs = self._build_environs(data)
